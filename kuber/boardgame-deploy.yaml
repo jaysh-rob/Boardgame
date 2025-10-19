@@ -15,5 +15,6 @@ spec:
         app: boardgame
     spec:
       containers:
-      - image: jackdhub/:
+      - image: jackdhub/boardgame:v4
         name: boardgame
+
