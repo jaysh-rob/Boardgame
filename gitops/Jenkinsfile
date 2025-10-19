@@ -1,0 +1,71 @@
+pipeline {
+    agent {label 'server1'}
+    
+    parameters {
+        string(name: 'DOCKER_TAG', defaultValue: '', description: 'Setting Docker image for latest push')
+        string(name: 'PROJECT_NAME', defaultValue: '', description: 'Setting Docker image for latest push')
+    }
+
+    stages {
+        stage("Workspace cleanup"){
+            steps{
+                script{
+                    cleanWs()
+                }
+            }
+        }
+        
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/jaysh-rob/Boardgame.git'
+            }
+        }
+        
+        stage('Verify: Docker Image Tags') {
+            steps {
+                script{
+                    echo "DOCKER_TAG: ${params.DOCKER_TAG}"
+                    echo "PROJECT_NAME: ${params.PROJECT_NAME}"
+                }
+            }
+        }
+        
+        
+        stage("Update: Kubernetes manifests"){
+            steps{
+                script{
+                    dir('kuber'){
+                        sh """
+                            sed -i 's|image: jackdhub/[^ ]*|image: jackdhub/'"${params.PROJECT_NAME}:${params.DOCKER_TAG}"'|' boardgame-deploy.yaml
+                        """
+                    }
+                }
+            }
+        }
+
+                stage("Git: Code update and push to GitHub"){
+            steps{
+                script{
+                    withCredentials([gitUsernamePassword(credentialsId: 'Github-cred', gitToolName: 'Default')]) {
+                        sh '''
+                        echo "Checking repository status: "
+                        git status
+                    
+                        echo "Adding changes to git: "
+                        git add .
+                        
+                        echo "Commiting changes: "
+                        git commit -m "Updated environment variables"
+                        
+                        echo "Pushing changes to github: "
+                        git push https://github.com/jaysh-rob/Boardgame.git main
+                    '''
+                    }
+                }
+            }
+        }
+    }
+
+    }
+
+}
