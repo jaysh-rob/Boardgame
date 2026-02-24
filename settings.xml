@@ -1,0 +1,19 @@
+<settings>
+
+  <servers>
+
+    <server>
+      <id>central</id>
+      <username>admin</username>
+      <password>Fullclip#7711</password>
+    </server>
+
+    <server>
+      <id>snapshots</id>
+      <username>admin</username>
+      <password>Fullclip#7711</password>
+    </server>
+
+  </servers>
+
+</settings>
